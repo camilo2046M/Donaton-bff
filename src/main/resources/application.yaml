@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: donaton-bff
+
+server:
+  port: 8080
+
+# Configuración del patrón Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      logisticaCB: # Nombre de nuestro interruptor para el ms-logistica
+        registerHealthIndicator: true
+        slidingWindowSize: 5 # Evalúa las últimas 5 llamadas
+        failureRateThreshold: 50 # Si el 50% falla, el circuito se "abre" y bloquea peticiones
+        waitDurationInOpenState: 10s # Espera 10 segundos antes de intentar reconectar
+        permittedNumberOfCallsInHalfOpenState: 3
+      necesidadesCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
