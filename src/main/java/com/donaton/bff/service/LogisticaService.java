@@ -38,14 +38,13 @@ public class LogisticaService {
         // Construimos la URL: .../envios/{id}/estado?nuevoEstado=VALOR
         String url = logisticaUrl + "/" + id + "/estado?nuevoEstado=" + estado;
 
-        // PATCH en RestTemplate requiere un pequeño truco o usar postForObject si el MS lo permite,
-        // pero aquí lo enviamos como un PATCH vacío ya que el dato va en la URL.
+
         restTemplate.patchForObject(url, null, Map.class);
 
         return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }
 
-    // --- MÉTODOS FALLBACK (Se mantienen igual para no afectar al frontend) ---
+
 
     public Object fallbackEnvios(Throwable t) {
         return List.of(Map.of("error", "Servicio logístico no disponible", "estado", "FALLBACK"));
