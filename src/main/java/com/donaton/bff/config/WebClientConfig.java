@@ -8,7 +8,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
+    public WebClient donacionesClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8081") // Puerto de Donaciones
+                .build();
+    }
+
+    @Bean
+    public WebClient logisticaClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8082") // Puerto de Logística
+                .build();
     }
 }
