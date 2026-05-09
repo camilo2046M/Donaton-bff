@@ -8,9 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Servicio que actúa como cliente HTTP hacia el MS de Necesidades.
- */
+
 @Service
 public class NecesidadesService {
 
