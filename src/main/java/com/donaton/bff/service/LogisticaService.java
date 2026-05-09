@@ -13,6 +13,7 @@ public class LogisticaService {
 
     private final RestTemplate restTemplate;
 
+
     @Value("${donaton.ms.logistica.url:http://localhost:8082/api/envios}")
     private String logisticaUrl;
 
@@ -21,40 +22,37 @@ public class LogisticaService {
     }
 
 
+
     @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackEnvios")
     public Object obtenerEnvios() {
-        // Tu MS de logística usa /listar para obtener todos
-        return restTemplate.getForObject(logisticaUrl + "/listar", List.class);
+
+        return restTemplate.getForObject(logisticaUrl, List.class);
     }
 
     @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
-        return restTemplate.postForObject(logisticaUrl + "/procesar/medicamento", body, Map.class);
-    }
 
+        String url = logisticaUrl + "/procesar/medicamento";
+        return restTemplate.postForObject(url, body, List.class);
+    }
 
     @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackActualizarEstado")
     public Object actualizarEstado(Long id, String estado) {
-        // Construimos la URL: .../envios/{id}/estado?nuevoEstado=VALOR
         String url = logisticaUrl + "/" + id + "/estado?nuevoEstado=" + estado;
-
-
         restTemplate.patchForObject(url, null, Map.class);
 
         return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }
 
-
-
     public Object fallbackEnvios(Throwable t) {
-        return List.of(Map.of("error", "Servicio logístico no disponible", "estado", "FALLBACK"));
+        return List.of(Map.of("error", "Servicio logístico no disponible (GET)", "estado", "FALLBACK"));
     }
 
     public Object fallbackCrearEnvio(Map<String, Object> body, Throwable t) {
-        return Map.of("error", "No se pudo registrar el envío.", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo registrar el envío (POST).", "estado", "FALLBACK");
     }
 
     public Object fallbackActualizarEstado(Long id, String estado, Throwable t) {
-        return Map.of("error", "No se pudo actualizar el estado.", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo actualizar el estado (PATCH).", "estado", "FALLBACK");
     }
 }

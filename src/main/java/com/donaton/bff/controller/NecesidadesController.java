@@ -18,6 +18,8 @@ public class NecesidadesController {
     }
 
 
+
+
     @GetMapping
     public ResponseEntity<?> getNecesidades() {
         return ResponseEntity.ok(necesidadesService.obtenerNecesidades());
