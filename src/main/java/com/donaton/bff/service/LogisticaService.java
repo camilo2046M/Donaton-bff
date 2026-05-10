@@ -29,6 +29,7 @@ public class LogisticaService {
         return restTemplate.getForObject(logisticaUrl, List.class);
     }
 
+
     @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
 
