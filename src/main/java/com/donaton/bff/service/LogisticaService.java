@@ -13,47 +13,57 @@ public class LogisticaService {
 
     private final RestTemplate restTemplate;
 
-
-    @Value("${donaton.ms.logistica.url:http://localhost:8082/api/envios}")
+    // Lee la URL base desde application.yaml: http://localhost:8082/api/v1
+    @Value("${donaton.ms.logistica.url}")
     private String logisticaUrl;
 
     public LogisticaService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-
-
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackEnvios")
+    /**
+     * GET http://localhost:8082/api/v1/envios
+     * Corresponde a @GetMapping en EnvioController del MS
+     */
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackEnvios")
     public Object obtenerEnvios() {
-
-        return restTemplate.getForObject(logisticaUrl, List.class);
+        return restTemplate.getForObject(logisticaUrl + "/envios", List.class);
     }
 
-
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackCrearEnvio")
+    /**
+     * POST http://localhost:8082/api/v1/envios
+     * Corresponde a @PostMapping en EnvioController del MS
+     */
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
-
-        String url = logisticaUrl + "/procesar/medicamento";
-        return restTemplate.postForObject(url, body, List.class);
+        return restTemplate.postForObject(logisticaUrl + "/envios", body, Map.class);
     }
 
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackActualizarEstado")
+    /**
+     * PATCH http://localhost:8082/api/v1/envios/{id}/estado
+     */
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackActualizarEstado")
     public Object actualizarEstado(Long id, String estado) {
-        String url = logisticaUrl + "/" + id + "/estado?nuevoEstado=" + estado;
-        restTemplate.patchForObject(url, null, Map.class);
-
-        return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
+        String url = logisticaUrl + "/envios/" + id + "/estado";
+        restTemplate.patchForObject(url, Map.of("estado", estado), Map.class);
+        return Map.of("id", id, "estado", estado);
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackEnvios(Throwable t) {
-        return List.of(Map.of("error", "Servicio logístico no disponible (GET)", "estado", "FALLBACK"));
+        return List.of(Map.of(
+                "error", "Servicio logístico temporalmente no disponible",
+                "estado", "FALLBACK"
+        ));
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackCrearEnvio(Map<String, Object> body, Throwable t) {
-        return Map.of("error", "No se pudo registrar el envío (POST).", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo registrar el envío. Intenta nuevamente.", "estado", "FALLBACK");
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackActualizarEstado(Long id, String estado, Throwable t) {
-        return Map.of("error", "No se pudo actualizar el estado (PATCH).", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo actualizar el estado.", "estado", "FALLBACK");
     }
 }
