@@ -7,15 +7,22 @@ spring:
 
 donaton:
   ms:
+    donaciones:
+      url: http://localhost:8081/api/v1   # MS Donaciones — Puerto 8081
     logistica:
-      url: http://localhost:8081
+      url: http://localhost:8082/api/v1   # MS Logística  — Puerto 8082
     necesidades:
-      url: http://localhost:8082
-
+      url: http://localhost:8083/api/v1   # MS Necesidades — Puerto 8083
 
 resilience4j:
   circuitbreaker:
     instances:
+      donacionesCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
       logisticaCB:
         registerHealthIndicator: true
         slidingWindowSize: 5
@@ -27,8 +34,8 @@ resilience4j:
         slidingWindowSize: 5
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 logging:
   level:
     com.donaton: DEBUG
