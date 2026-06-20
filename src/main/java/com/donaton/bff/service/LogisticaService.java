@@ -14,7 +14,7 @@ public class LogisticaService {
     private final RestTemplate restTemplate;
 
 
-    @Value("${donaton.ms.logistica.url:http://localhost:8082/api/envios}")
+    @Value("${donaton.ms.logistica.url:http://localhost:8081/api/envios}")
     private String logisticaUrl;
 
     public LogisticaService(RestTemplate restTemplate) {
@@ -23,25 +23,24 @@ public class LogisticaService {
 
 
 
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackEnvios")
+
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackEnvios")
     public Object obtenerEnvios() {
-
-        return restTemplate.getForObject(logisticaUrl, List.class);
+        // CORREGIDO: Cambiado a puerto 8082
+        return restTemplate.getForObject("http://localhost:8082/api/envios", List.class);
     }
 
-
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackCrearEnvio")
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
-
-        String url = logisticaUrl + "/procesar/medicamento";
-        return restTemplate.postForObject(url, body, List.class);
+        // CORREGIDO: Cambiado a puerto 8082
+        return restTemplate.postForObject("http://localhost:8082/api/envios/procesar/medicamento", body, List.class);
     }
 
-    @CircuitBreaker(name = "logistica", fallbackMethod = "fallbackActualizarEstado")
+    @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackActualizarEstado")
     public Object actualizarEstado(Long id, String estado) {
-        String url = logisticaUrl + "/" + id + "/estado?nuevoEstado=" + estado;
+        // CORREGIDO: Cambiado a puerto 8082
+        String url = "http://localhost:8082/api/envios/" + id + "/estado?nuevoEstado=" + estado;
         restTemplate.patchForObject(url, null, Map.class);
-
         return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }
 
