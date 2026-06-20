@@ -5,13 +5,24 @@ spring:
   application:
     name: donaton-bff
 
-
-donaton.ms.logistica.url: http://localhost:8082
-donaton.ms.necesidades.url: http://localhost:8083
+donaton:
+  ms:
+    logistica:
+      url: "http://localhost:8082/api/v1"   # MS Logística  — Puerto 8082
+    necesidades:
+      url: "http://localhost:8083/api/v1"   # MS Necesidades — Puerto 8083
+    donaciones:
+      url: "http://localhost:8081/api/v1"   # MS Donaciones — Puerto 8081 (¡Añadido para evitar el crash!)
 
 resilience4j:
   circuitbreaker:
     instances:
+      donacionesCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
       logisticaCB:
         registerHealthIndicator: true
         slidingWindowSize: 5
@@ -25,7 +36,6 @@ resilience4j:
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 2
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 logging:
   level:
     com.donaton: DEBUG
