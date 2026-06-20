@@ -8,12 +8,12 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
 public class NecesidadesService {
 
     private final RestTemplate restTemplate;
 
+    // Trae la URL base del microservicio (ej: http://localhost:8083)
     @Value("${donaton.ms.necesidades.url}")
     private String necesidadesUrl;
 
@@ -21,9 +21,15 @@ public class NecesidadesService {
         this.restTemplate = restTemplate;
     }
 
+    // Método auxiliar interno para garantizar que la ruta coincida con el @RequestMapping del microservicio nativo
+    private String getEndpointUrl() {
+        return necesidadesUrl + "/api/v1/necesidades";
+    }
+
     @CircuitBreaker(name = "necesidades", fallbackMethod = "fallbackNecesidades")
     public Object obtenerNecesidades() {
-        return restTemplate.getForObject(necesidadesUrl + "/necesidades", List.class);
+        // CORREGIDO: Ahora llamará correctamente a http://localhost:8083/api/v1/necesidades
+        return restTemplate.getForObject(getEndpointUrl(), List.class);
     }
 
     @SuppressWarnings("unused")
@@ -36,7 +42,8 @@ public class NecesidadesService {
 
     @CircuitBreaker(name = "necesidades", fallbackMethod = "fallbackCrearNecesidad")
     public Object crearNecesidad(Map<String, Object> body) {
-        return restTemplate.postForObject(necesidadesUrl + "/necesidades", body, Map.class);
+        // CORREGIDO: POST a http://localhost:8083/api/v1/necesidades
+        return restTemplate.postForObject(getEndpointUrl(), body, Map.class);
     }
 
     @SuppressWarnings("unused")
@@ -46,9 +53,10 @@ public class NecesidadesService {
 
     @CircuitBreaker(name = "necesidades", fallbackMethod = "fallbackAtender")
     public Object atenderNecesidad(Long id) {
-        String url = necesidadesUrl + "/necesidades/" + id + "/atender";
+        // CORREGIDO: PATCH a http://localhost:8083/api/v1/necesidades/{id}/atender
+        String url = getEndpointUrl() + "/" + id + "/atender";
         restTemplate.patchForObject(url, null, Map.class);
-        return Map.of("id", id, "estado", "ATENDIDA");
+        return Map.of("id", id, "estado", "ATENDIDA", "mensaje", "Sincronizado desde BFF");
     }
 
     @SuppressWarnings("unused")
