@@ -44,15 +44,21 @@ public class LogisticaService {
         return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackEnvios(Throwable t) {
-        return List.of(Map.of("error", "Servicio logístico no disponible (GET)", "estado", "FALLBACK"));
+        return List.of(Map.of(
+                "error", "Servicio logístico temporalmente no disponible",
+                "estado", "FALLBACK"
+        ));
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackCrearEnvio(Map<String, Object> body, Throwable t) {
-        return Map.of("error", "No se pudo registrar el envío (POST).", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo registrar el envío. Intenta nuevamente.", "estado", "FALLBACK");
     }
 
+    @SuppressWarnings("unused")
     public Object fallbackActualizarEstado(Long id, String estado, Throwable t) {
-        return Map.of("error", "No se pudo actualizar el estado (PATCH).", "estado", "FALLBACK");
+        return Map.of("error", "No se pudo actualizar el estado.", "estado", "FALLBACK");
     }
 }
