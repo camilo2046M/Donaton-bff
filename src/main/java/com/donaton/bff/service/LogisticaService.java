@@ -13,40 +13,35 @@ public class LogisticaService {
 
     private final RestTemplate restTemplate;
 
-    // Lee la URL base desde application.yaml: http://localhost:8082/api/v1
-    @Value("${donaton.ms.logistica.url}")
+
+    @Value("${donaton.ms.logistica.url:http://localhost:8081/api/envios}")
     private String logisticaUrl;
 
     public LogisticaService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    /**
-     * GET http://localhost:8082/api/v1/envios
-     * Corresponde a @GetMapping en EnvioController del MS
-     */
+
+
+
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackEnvios")
     public Object obtenerEnvios() {
-        return restTemplate.getForObject(logisticaUrl + "/envios", List.class);
+        // CORREGIDO: Cambiado a puerto 8082
+        return restTemplate.getForObject("http://localhost:8082/api/envios", List.class);
     }
 
-    /**
-     * POST http://localhost:8082/api/v1/envios
-     * Corresponde a @PostMapping en EnvioController del MS
-     */
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
-        return restTemplate.postForObject(logisticaUrl + "/envios", body, Map.class);
+        // CORREGIDO: Cambiado a puerto 8082
+        return restTemplate.postForObject("http://localhost:8082/api/envios/procesar/medicamento", body, List.class);
     }
 
-    /**
-     * PATCH http://localhost:8082/api/v1/envios/{id}/estado
-     */
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackActualizarEstado")
     public Object actualizarEstado(Long id, String estado) {
-        String url = logisticaUrl + "/envios/" + id + "/estado";
-        restTemplate.patchForObject(url, Map.of("estado", estado), Map.class);
-        return Map.of("id", id, "estado", estado);
+        // CORREGIDO: Cambiado a puerto 8082
+        String url = "http://localhost:8082/api/envios/" + id + "/estado?nuevoEstado=" + estado;
+        restTemplate.patchForObject(url, null, Map.class);
+        return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }
 
     @SuppressWarnings("unused")
