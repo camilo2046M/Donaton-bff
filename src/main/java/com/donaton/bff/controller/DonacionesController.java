@@ -8,6 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bff/donaciones")
+@CrossOrigin(origins = "*")
 public class DonacionesController {
 
     private final DonacionesService donacionesService;

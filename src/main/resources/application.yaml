@@ -5,10 +5,17 @@ spring:
   application:
     name: donaton-bff
 
+# ── URLs de Microservicios ────────────────────────────────────────────────────
+donaton:
+  ms:
+    logistica:
+      url: http://localhost:8082
+    necesidades:
+      url: http://localhost:8083
+    donaciones:
+      url: http://localhost:8081
 
-donaton.ms.logistica.url: http://localhost:8082
-donaton.ms.necesidades.url: http://localhost:8083
-
+# ── Resilience4j ──────────────────────────────────────────────────────────────
 resilience4j:
   circuitbreaker:
     instances:

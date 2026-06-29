@@ -13,33 +13,34 @@ public class LogisticaService {
 
     private final RestTemplate restTemplate;
 
-
-    @Value("${donaton.ms.logistica.url:http://localhost:8081/api/envios}")
+    @Value("${donaton.ms.logistica.url:http://localhost:8082}")
     private String logisticaUrl;
 
     public LogisticaService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-
-
+    // Usamos un método auxiliar como en NecesidadesService para mantener el estándar
+    private String getEndpointUrl() {
+        return logisticaUrl + "/api/v1/envios";
+    }
 
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackEnvios")
     public Object obtenerEnvios() {
-        // CORREGIDO: Cambiado a puerto 8082
-        return restTemplate.getForObject("http://localhost:8082/api/envios", List.class);
+        return restTemplate.getForObject(getEndpointUrl(), List.class);
     }
 
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackCrearEnvio")
     public Object crearEnvio(Map<String, Object> body) {
-        // CORREGIDO: Cambiado a puerto 8082
-        return restTemplate.postForObject("http://localhost:8082/api/envios/procesar/medicamento", body, List.class);
+        // Obtenemos el tipo desde el body, asumiendo que el controlador de logística espera un {tipo}
+        // Ajusta esto si el body no tiene la llave "tipo" o si la ruta es diferente.
+        String url = getEndpointUrl();
+        return restTemplate.postForObject(url, body, List.class);
     }
 
     @CircuitBreaker(name = "logisticaCB", fallbackMethod = "fallbackActualizarEstado")
     public Object actualizarEstado(Long id, String estado) {
-        // CORREGIDO: Cambiado a puerto 8082
-        String url = "http://localhost:8082/api/envios/" + id + "/estado?nuevoEstado=" + estado;
+        String url = getEndpointUrl() + "/" + id + "/estado?nuevoEstado=" + estado;
         restTemplate.patchForObject(url, null, Map.class);
         return Map.of("id", id, "estado", estado, "mensaje", "Sincronización enviada");
     }

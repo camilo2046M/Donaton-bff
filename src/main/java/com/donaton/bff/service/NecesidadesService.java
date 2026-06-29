@@ -14,7 +14,7 @@ public class NecesidadesService {
     private final RestTemplate restTemplate;
 
     // Trae la URL base del microservicio (ej: http://localhost:8083)
-    @Value("${donaton.ms.necesidades.url}")
+    @Value("${donaton.ms.necesidades.url:http://localhost:8083}")
     private String necesidadesUrl;
 
     public NecesidadesService(RestTemplate restTemplate) {

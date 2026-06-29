@@ -13,26 +13,34 @@ public class DonacionesService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${donaton.ms.donaciones.url}")
+    @Value("${donaton.ms.donaciones.url:http://localhost:8081}")
     private String donacionesUrl;
 
     public DonacionesService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
+    private String getEndpointUrl() {
+        return donacionesUrl + "/api/v1/donaciones";
+    }
+
     @CircuitBreaker(name = "donacionesCB", fallbackMethod = "fallbackListar")
     public Object listarDonaciones() {
-        return restTemplate.getForObject(donacionesUrl + "/donaciones", List.class);
+        return restTemplate.getForObject(getEndpointUrl() + "/listar", List.class); // Apuntando al /listar de tu controlador
     }
 
     @CircuitBreaker(name = "donacionesCB", fallbackMethod = "fallbackCrear")
     public Object crearDonacion(Map<String, Object> body) {
-        return restTemplate.postForObject(donacionesUrl + "/donaciones", body, Map.class);
+        // Tu controlador usa request params, no un RequestBody.
+        // Esto requiere una adaptación para enviar los datos por URL o cambiar el controlador.
+        // Por ahora, asumimos que el body se envía como parámetros o que el controlador se adaptó a @RequestBody
+        // Si el controlador sigue usando @RequestParam, este postForObject fallará porque Spring espera un JSON.
+        return restTemplate.postForObject(getEndpointUrl() + "/crear", body, Map.class);
     }
 
     @CircuitBreaker(name = "donacionesCB", fallbackMethod = "fallbackCompletar")
     public Object completarDonacion(Long id) {
-        String url = donacionesUrl + "/donaciones/" + id + "/completar";
+        String url = getEndpointUrl() + "/" + id + "/completar";
         restTemplate.patchForObject(url, null, Map.class);
         return Map.of("id", id, "estado", "COMPLETADA");
     }

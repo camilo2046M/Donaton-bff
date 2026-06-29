@@ -20,4 +20,11 @@ public class WebClientConfig {
                 .baseUrl("http://localhost:8082") // Puerto de Logística
                 .build();
     }
+
+    @Bean
+    public WebClient necesidadesClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8083") // Puerto de Necesidades
+                .build();
+    }
 }
